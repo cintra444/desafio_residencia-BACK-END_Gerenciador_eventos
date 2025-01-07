@@ -9,23 +9,25 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import br.com.desafioresidencia.gerenciadoreventos.jwt.JwtUtil;
-import br.com.desafioresidencia.gerenciadoreventos.services.AdminDetailsServiceImpl;
+import br.com.desafioresidencia.gerenciadoreventos.security.jwt.JwtUtils;
+import br.com.desafioresidencia.gerenciadoreventos.security.services.AdminDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
-    private JwtUtil jwtUtils;
+    private JwtUtils jwtUtils;
 
     @Autowired
-    private AdminDetailsServiceImpl adminDetailsService; // Serviço de detalhes do administrador
+    private AdminDetailsServiceImpl adminDetailsService;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
@@ -33,44 +35,35 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            // Extrair o token JWT do cabeçalho da requisição
             String jwt = extractJwtFromRequest(request);
 
-            // Validar o token JWT
-            if (jwt != null && jwtUtils.validateToken(jwt)) {
-                // Obter o nome do administrador a partir do token
-                String username = jwtUtils.getUserNameFromToken(jwt);
-
-                // Carregar os detalhes do administrador
-                UserDetails userDetails = adminDetailsService.loadUserByUsername(username);
-
-                // Criar o objeto de autenticação para o contexto de segurança
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Definir a autenticação no contexto de segurança
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (jwt != null) {
+                if (jwtUtils.validateToken(jwt)) {
+                    String username = jwtUtils.getUserNameFromToken(jwt);
+                    UserDetails userDetails = adminDetailsService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    logger.warn("Token JWT inválido ou expirado.");
+                }
             }
         } catch (Exception e) {
-            logger.error("Erro ao autenticar o administrador: {}", e.getMessage());
+            logger.error("Erro na Autenticação: {}", e.getMessage());
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Erro na Autenticação: " + e.getMessage());
+            return;
         }
 
-        // Continuar o processamento da requisição
+        // Continuar o filtro se a autenticação foi bem-sucedida ou se o token for inválido
         filterChain.doFilter(request, response);
     }
 
-    /**
-     * Extrai o token JWT do cabeçalho da requisição.
-     *
-     * @param request A requisição HTTP
-     * @return O token JWT ou null se não estiver presente
-     */
     private String extractJwtFromRequest(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
 
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7); // Remove o prefixo "Bearer "
+            return headerAuth.substring(7).trim();
         }
 
         return null;
