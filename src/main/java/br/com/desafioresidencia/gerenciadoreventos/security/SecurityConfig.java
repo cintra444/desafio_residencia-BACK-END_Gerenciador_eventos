@@ -47,8 +47,8 @@ public class SecurityConfig {
 
 	// Cria o filtro para autenticação via JWT
 	@Bean
-	public AuthTokenFilter authenticationJwtTokenFilter() {
-		return new AuthTokenFilter();
+	public JwtAuthenticationFilter authenticationJwtTokenFilter() {
+		return new JwtAuthenticationFilter();
 	}
 
 	// Configura o provedor de autenticação com um serviço de detalhes de usuário customizado

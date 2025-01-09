@@ -9,13 +9,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import br.com.desafioresidencia.gerenciadoreventos.security.entities.Administrador;
-import br.com.desafioresidencia.gerenciadoreventos.security.repositories.AdminRepository;
+import br.com.desafioresidencia.gerenciadoreventos.security.repositories.AdministradorRepository;
 
 @Service
 public class AdminDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
-    private AdminRepository adminRepository;
+    private AdministradorRepository adminRepository;
     
     @Autowired
 	private BCryptPasswordEncoder passwordEncoder;

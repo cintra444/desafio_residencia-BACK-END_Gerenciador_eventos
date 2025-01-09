@@ -9,6 +9,6 @@ import br.com.desafioresidencia.gerenciadoreventos.security.entities.Evento;
 
 @Repository("evento")
 public interface EventoRepository extends JpaRepository<Evento, Long> {
-	List<Evento> findByAdminId(Long adminId);
+	List<Evento> findByAdministradorId(Long administradorId);
 
 }

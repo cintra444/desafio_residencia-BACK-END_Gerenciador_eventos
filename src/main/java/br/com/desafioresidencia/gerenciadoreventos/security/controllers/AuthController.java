@@ -18,7 +18,7 @@ import br.com.desafioresidencia.gerenciadoreventos.security.dtos.LoginRequestDTO
 import br.com.desafioresidencia.gerenciadoreventos.security.dtos.SignupRequestDTO;
 import br.com.desafioresidencia.gerenciadoreventos.security.entities.Administrador;
 import br.com.desafioresidencia.gerenciadoreventos.security.jwt.JwtUtils;
-import br.com.desafioresidencia.gerenciadoreventos.security.repositories.AdminRepository;
+import br.com.desafioresidencia.gerenciadoreventos.security.repositories.AdministradorRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
@@ -32,7 +32,7 @@ public class AuthController {
 	private AuthenticationManager authenticationManager;
 
 	@Autowired
-	private AdminRepository adminRepository;
+	private AdministradorRepository adminRepository;
 
 	@Autowired
 	private PasswordEncoder encoder;
