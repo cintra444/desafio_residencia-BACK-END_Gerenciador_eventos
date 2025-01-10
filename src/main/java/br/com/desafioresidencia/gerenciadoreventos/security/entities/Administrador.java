@@ -1,90 +1,83 @@
 package br.com.desafioresidencia.gerenciadoreventos.security.entities;
 
-import jakarta.persistence.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "administrador")
 public class Administrador {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ad_cd_adminId")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@NotBlank(message = "O nome não pode estar em branco.")
-	@Column(name = "ad_tx_nome")
-	private String nome;
+    @NotEmpty(message = "O nome é obrigatório")
+    @Column(name = "ad_tx_nome", nullable = false)
+    private String nome;
 
-	@NotNull(message = "O email não pode ser nulo.")
-	@NotBlank(message = "O email não pode estar em branco.")
-	@Email(message = "O email deve ser válido.")
-	@Column(name = "ad_tx_email", unique = true)
-	private String email;
+    @NotEmpty(message = "O email é obrigatório")
+    @Email(message = "O email deve ser válido")
+    @Column(name = "ad_tx_email", unique = true, nullable = false)
+    private String email;
 
-	@NotBlank(message = "A senha não pode estar em branco.")
-	@Column(name = "ad_tx_senha")
-	private String senha;
+    @NotEmpty(message = "A senha é obrigatória")
+    @Column(name = "ad_tx_senha", nullable = false)
+    private String senha;
 
-	@Column(name = "ad_tx_role", nullable = false)
-	private final String role = "ROLE_ADMIN"; // Campo fixo para ROLE_ADMIN
+    
+    public Administrador() {
+    }
 
-	// Construtor padrão
-	public Administrador() {
-	}
+    
+    public Administrador(String nome, String email, String senha) {
+        this.nome = nome;
+        this.email = email;
+        this.senha = senha; // Senha deve ser codificada antes de salvar
+    }
 
-	// Construtor com campos (exceto ID, pois é gerado pelo banco)
-	public Administrador(String nome, String email, String senha) {
-		this.nome = nome;
-		this.email = email;
-		this.senha = senha;
-	}
+    // Getters e Setters
+    public Long getId() {
+        return id;
+    }
 
-	// Construtor completo (inclui ID - para testes ou consultas específicas)
-	public Administrador(Long id, String nome, String email, String senha) {
-		this.id = id;
-		this.nome = nome;
-		this.email = email;
-		this.senha = senha;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Administrador(Object object, String nome, String email,
-			String encodedPassword, String string) {
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	// Getters
-	public Long getId() {
-		return id;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public String getNome() {
-		return nome;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public String getSenha() {
-		return senha;
-	}
+    public String getSenha() {
+        return senha;
+    }
 
-	public String getRole() {
-		return role;
-	}
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
 
-	// Setters (remover setRole, pois é fixo)
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
+    // Método auxiliar para codificar a senha
+    public void codificarSenha() {
+        this.senha = new BCryptPasswordEncoder().encode(this.senha);
+    }
 }
