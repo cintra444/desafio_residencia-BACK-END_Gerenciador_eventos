@@ -15,27 +15,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-        http
-            .csrf().disable() 
-            .authorizeHttpRequests()
-                .requestMatchers(
-                    "/login/**",
-                    "/h2-console/**",
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/actuator/**",
-                    "/api/administrador/cadastro",
-                    "/api/administrador/login"
-                ).permitAll()
-                // Todas as outras requisições precisam de autenticação
-                .anyRequest().authenticated()
-            .and()
-            // Filtro JWT
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    	http
+        .csrf().disable() 
+        .authorizeHttpRequests()
+            .anyRequest().permitAll() // Temporariamente permitir tudo
+        .and()
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Configuração adicional para o H2 Console
-        http.headers().frameOptions().disable(); 
-        
+    http.headers().frameOptions().disable(); 
+    
+    
         return http.build();
     }
 

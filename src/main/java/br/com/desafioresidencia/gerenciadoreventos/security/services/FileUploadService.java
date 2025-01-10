@@ -19,7 +19,7 @@ public class FileUploadService {
     private String uploadDirectory;
 
     @Value("${file.max-size}")
-    private long maxFileSize;
+    private Long maxFileSize;
 
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "image/jpeg", "image/png", "image/gif"
