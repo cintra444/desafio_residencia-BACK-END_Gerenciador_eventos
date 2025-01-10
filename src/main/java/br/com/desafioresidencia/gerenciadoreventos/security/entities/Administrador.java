@@ -9,65 +9,75 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "administrador")
 public class Administrador {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@NotNull(message = "O nome não pode ser nulo.")
-	@Column(name = "ad_tx_nome")
-	private String nome;
+    @NotEmpty(message = "O nome é obrigatório")
+    @Column(name = "ad_tx_nome", nullable = false)
+    private String nome;
 
-	@NotNull(message = "O email não pode ser nulo.")
-	@Email(message = "O email deve ser válido.")
-	@Column(name = "ad_tx_email", unique = true)
-	private String email;
+    @NotEmpty(message = "O email é obrigatório")
+    @Email(message = "O email deve ser válido")
+    @Column(name = "ad_tx_email", unique = true, nullable = false)
+    private String email;
 
-	@NotNull(message = "A senha não pode ser nulo.")
-	@Column(name = "ad_tx_senha")
-	private String senha;
+    @NotEmpty(message = "A senha é obrigatória")
+    @Column(name = "ad_tx_senha", nullable = false)
+    private String senha;
 
-	public Administrador(String nome, String email, String senha) {
-		this.nome = nome;
-		this.email = email;
-		this.senha = new BCryptPasswordEncoder().encode(senha);
-	}
+    
+    public Administrador() {
+    }
 
-	public Long getId() {
-		return id;
-	}
+    
+    public Administrador(String nome, String email, String senha) {
+        this.nome = nome;
+        this.email = email;
+        this.senha = senha; // Senha deve ser codificada antes de salvar
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    // Getters e Setters
+    public Long getId() {
+        return id;
+    }
 
-	public String getNome() {
-		return nome;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public String getSenha() {
-		return senha;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
+    public String getSenha() {
+        return senha;
+    }
 
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+
+    // Método auxiliar para codificar a senha
+    public void codificarSenha() {
+        this.senha = new BCryptPasswordEncoder().encode(this.senha);
+    }
 }

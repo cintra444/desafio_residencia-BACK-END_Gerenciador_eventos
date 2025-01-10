@@ -1,15 +1,8 @@
 package br.com.desafioresidencia.gerenciadoreventos.security.entities;
 
 import java.time.LocalDate;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
@@ -21,7 +14,7 @@ public class Evento {
     @Column(name = "ev_cd_idev")
     private Long id;
 
-    @NotNull(message = "O nome do evento é obrigatória.")
+    @NotEmpty(message = "O nome do evento é obrigatório.")
     @Column(name = "ev_tx_nome", nullable = false)
     private String nome;
 
@@ -29,7 +22,7 @@ public class Evento {
     @Column(name = "ev_dt_data", nullable = false)
     private LocalDate data;
 
-    @NotNull(message = "A localização do evento é obrigatória.")
+    @NotEmpty(message = "A localização do evento é obrigatória.")
     @Column(name = "ev_tx_localizacao", nullable = false)
     private String localizacao;
 
@@ -37,56 +30,68 @@ public class Evento {
     private String imagem;
 
     @ManyToOne
-    @JoinColumn(name = "administrador_id")
+    @JoinColumn(name = "administrador_id", nullable = false)
     private Administrador administrador;
 
-	public Long getId() {
-		return id;
-	}
+    // Construtor Padrão
+    public Evento() {}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    // Construtor completo
+    public Evento(String nome, LocalDate data, String localizacao, String imagem, Administrador administrador) {
+        this.nome = nome;
+        this.data = data;
+        this.localizacao = localizacao;
+        this.imagem = imagem;
+        this.administrador = administrador;
+    }
 
-	public String getNome() {
-		return nome;
-	}
+    // Getters e Setters
+    public Long getId() {
+        return id;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public LocalDate getData() {
-		return data;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public void setData(LocalDate data) {
-		this.data = data;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public String getLocalizacao() {
-		return localizacao;
-	}
+    public LocalDate getData() {
+        return data;
+    }
 
-	public void setLocalizacao(String localizacao) {
-		this.localizacao = localizacao;
-	}
+    public void setData(LocalDate data) {
+        this.data = data;
+    }
 
-	public String getImagem() {
-		return imagem;
-	}
+    public String getLocalizacao() {
+        return localizacao;
+    }
 
-	public void setImagem(String imagem) {
-		this.imagem = imagem;
-	}
+    public void setLocalizacao(String localizacao) {
+        this.localizacao = localizacao;
+    }
 
-	public Administrador getAdministrador() {
-		return administrador;
-	}
+    public String getImagem() {
+        return imagem;
+    }
 
-	public void setAdministrador(Administrador administrador) {
-		this.administrador = administrador;
-	}
+    public void setImagem(String imagem) {
+        this.imagem = imagem;
+    }
 
+    public Administrador getAdministrador() {
+        return administrador;
+    }
+
+    public void setAdministrador(Administrador administrador) {
+        this.administrador = administrador;
+    }
 
 }

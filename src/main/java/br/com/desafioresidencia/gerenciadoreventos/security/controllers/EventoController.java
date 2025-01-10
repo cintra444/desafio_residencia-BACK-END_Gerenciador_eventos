@@ -4,18 +4,22 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import br.com.desafioresidencia.gerenciadoreventos.security.dtos.EventoDTO;
 import br.com.desafioresidencia.gerenciadoreventos.security.entities.Evento;
 import br.com.desafioresidencia.gerenciadoreventos.security.services.EventoService;
+import br.com.desafioresidencia.gerenciadoreventos.security.services.FileUploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
@@ -24,70 +28,82 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class EventoController {
 
-	@Autowired
-	private EventoService eventoService;
+    @Autowired
+    private EventoService eventoService;
 
-	@GetMapping("listar/{adminId}")
-	@Operation(summary = "Listagem de todos os eventos", description = "Retorna todos os eventos.")
-	@ApiResponse(responseCode = "200", description = "Eventos listados com sucesso.")
-	public List<Evento> listarTodosEventos(@PathVariable Long adminId) {
-		return eventoService.listarTodosEventos(adminId);
-		
-	}
+    @Autowired
+    private FileUploadService fileUploadService;
 
-//	@GetMapping("/admin/{adminId}")
-//	@Operation(summary = "Listagem de eventos por administrador", description = "Retorna todos os eventos associados ao administrador.")
-//	@ApiResponse(responseCode = "200", description = "Eventos listados com sucesso.")
-//	public ResponseEntity<List<Evento>> listarEventosPorAdmin(
-//			@PathVariable Long adminId) {
-//		List<Evento> eventos = eventoRepository.findByAdminId(adminId);
-//
-//		if (eventos.isEmpty()) {
-//			return ResponseEntity.noContent().build(); // status 204
-//		}
-//
-//		return ResponseEntity.ok(eventos);
-//	}
+    @PostMapping("/criar")
+    @Operation(
+        summary = "Criar um evento",
+        description = "Cria um evento associado a um administrador e opcionalmente carrega uma imagem.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Evento criado com sucesso."),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos.")
+        }
+    )
+    public EventoDTO criarEvento(
+            @RequestParam String nome,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
+            @RequestParam String localizacao,
+            @RequestParam Long adminId,
+            @RequestParam(required = false) MultipartFile image) throws Exception {
 
-	@PostMapping("/cadastro")
-	@Operation(summary = "Cadastro de evento", description = "Cadastra um evento associado ao administrador.")
-	@ApiResponse(responseCode = "201", description = "Evento cadastrado com sucesso.")
-	public Evento cadastrarEvento(@RequestBody Evento evento) {
-		return eventoService.cadastrarEvento(evento);	
-	}
+        String imagePath = null;
+        if (image != null) {
+            imagePath = fileUploadService.uploadImage(image);
+        }
 
-	@PutMapping("/atualizar/{eventoId}")
-	@Operation(summary = "Atualização de evento", description = "Atualiza a data ou localização de um evento.")
-	@ApiResponse(responseCode = "200", description = "Evento atualizado com sucesso.")
-	public Evento atualizarEvento(@PathVariable Long eventoId, @RequestBody LocalDate data, @RequestBody String localizacao) {
-		return eventoService.atualizarEvento(eventoId, data, localizacao);
-		
-	}
+        Evento evento = eventoService.criarEvento(nome, data, localizacao, adminId, imagePath);
+        return new EventoDTO(evento);
+    }
 
-	@DeleteMapping("/excluir/{eventoId}")
-	@Operation(summary = "Exclusão de evento", description = "Exclui um evento usando o eventoId.")
-	@ApiResponse(responseCode = "200", description = "Evento excluído com sucesso.")
-	public void excluirEvento(@PathVariable Long eventoId) {
-		eventoService.excluirEvento(eventoId);		
-	}
-	
-//	@PostMapping("/{eventoId}/imagem")
-//	@Operation(summary = "Inserir imagem", description = "Inserir uma imagem em um evento.")
-//	@ApiResponse(responseCode = "200", description = "Imagem inserida com sucesso.")
-//	public ResponseEntity<String> uploadImagem(@PathVariable Long eventoId,
-//			@RequestParam("file") MultipartFile file) {
-//		try {
-//			// Salva a imagem e obtém a URL
-//			String urlImagem = eventoService.salvarImagem(file);
-//
-//			// Associa a URL da imagem ao evento
-//			eventoService.associarImagemAoEvento(eventoId, urlImagem);
-//
-//			return ResponseEntity
-//					.ok("Imagem carregada com sucesso. URL: " + urlImagem);
-//		} catch (Exception e) {
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//					.body("Erro ao fazer upload da imagem: " + e.getMessage());
-//		}
-//	}
+    @GetMapping("/{id}")
+    @Operation(
+        summary = "Obter evento por ID",
+        description = "Retorna o evento associado ao ID informado.",
+        responses = {@ApiResponse(responseCode = "200", description = "Evento obtido com sucesso.")}
+    )
+    public EventoDTO obterEvento(@PathVariable Long id) {
+        Evento evento = eventoService.obterEvento(id);
+        return new EventoDTO(evento);
+    }
+
+    @GetMapping("/listar/{adminId}")
+    @Operation(
+        summary = "Listar eventos",
+        description = "Retorna todos os eventos associados a um administrador.",
+        responses = {@ApiResponse(responseCode = "200", description = "Eventos listados com sucesso.")}
+    )
+    public List<EventoDTO> listarTodosEventos(@PathVariable Long adminId) {
+        return eventoService.listarTodosEventos(adminId).stream()
+                .map(EventoDTO::new)
+                .toList();
+    }
+
+    @PutMapping("/atualizar/{eventoId}")
+    @Operation(
+        summary = "Atualizar evento",
+        description = "Atualiza a data e/ou localização de um evento.",
+        responses = {@ApiResponse(responseCode = "200", description = "Evento atualizado com sucesso.")}
+    )
+    public EventoDTO atualizarEvento(
+            @PathVariable Long eventoId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
+            @RequestParam(required = false) String localizacao) {
+
+        Evento evento = eventoService.atualizarEvento(eventoId, data, localizacao);
+        return new EventoDTO(evento);
+    }
+
+    @DeleteMapping("/excluir/{eventoId}")
+    @Operation(
+        summary = "Excluir evento",
+        description = "Exclui um evento pelo ID.",
+        responses = {@ApiResponse(responseCode = "200", description = "Evento excluído com sucesso.")}
+    )
+    public void excluirEvento(@PathVariable Long eventoId) {
+        eventoService.excluirEvento(eventoId);
+    }
 }
