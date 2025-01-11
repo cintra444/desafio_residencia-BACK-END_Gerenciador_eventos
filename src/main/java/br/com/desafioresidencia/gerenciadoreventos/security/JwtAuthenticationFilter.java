@@ -29,16 +29,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		try {
-			// Extrair o token do cabeçalho Authorization
+			
 			String token = extrairToken(request);
 
-			// Verificar se o token é válido
+			
 			if (token != null && jwtUtil.verificarToken(token)) {
-				// Extrair o email do token
+				
 				String email = jwtUtil.extrairEmail(token);
 
 				if (email != null) {
-					// Configurar o contexto de autenticação
+					
 					logger.info("Token valido para o email: {}", email);
 					SecurityContextHolder.getContext()
 							.setAuthentication(new JwtAuthentication(email));
