@@ -34,7 +34,7 @@ public class LoginService {
             Administrador administrador = administradorOpt.get();
 
             if (passwordEncoder.matches(senha, administrador.getSenha())) {
-                return jwtUtil.generarToken(email);
+                return jwtUtil.gerarToken(email);
             }
         }
 

@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 
 @RestController
-@RequestMapping("/api/administradores")
+@RequestMapping("/api/administrador")
 public class LoginController {
 
 	@Autowired
