@@ -2,6 +2,8 @@ package br.com.desafioresidencia.gerenciadoreventos.security;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	@Autowired
 	private JwtUtil jwtUtil;
+	
+	private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,
@@ -35,11 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 				if (email != null) {
 					// Configurar o contexto de autenticação
+					logger.info("Token valido para o email: {}", email);
 					SecurityContextHolder.getContext()
 							.setAuthentication(new JwtAuthentication(email));
 				}
 			}
-		} catch (Exception ignored) {
+		} catch (Exception e) {
+			logger.error("Erro ao autenticar a requisição", e);
 		}
 
 		filterChain.doFilter(request, response);
