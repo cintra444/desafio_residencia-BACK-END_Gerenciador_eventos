@@ -1,7 +1,5 @@
 package br.com.desafioresidencia.gerenciadoreventos.security.services;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,16 +26,13 @@ public class LoginService {
     private BCryptPasswordEncoder passwordEncoder;
 
     public String login(String email, String senha) {
-        Optional<Administrador> administradorOpt = administradorRepository.findByEmail(email);
+       Administrador administrador = administradorRepository.findByEmail(email)
+    		   .orElseThrow(() -> new AuthenticationException("error.authentication.invalid", messageSource));
 
-        if (administradorOpt.isPresent()) {
-            Administrador administrador = administradorOpt.get();
+       if (!passwordEncoder.matches(senha, administrador.getSenha())) {
+           throw new AuthenticationException("error.authentication.invalid", messageSource);
+       }
 
-            if (passwordEncoder.matches(senha, administrador.getSenha())) {
-                return jwtUtil.gerarToken(email);
-            }
-        }
-
-        throw new AuthenticationException("error.authentication.invalid", messageSource);
-    }
+       return jwtUtil.gerarToken(email);
+   }
 }

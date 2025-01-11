@@ -18,8 +18,9 @@ public class SecurityConfig {
     	http
         .csrf().disable() 
         .authorizeHttpRequests()
-            .anyRequest().permitAll() // Temporariamente permitir tudo
-        .and()
+            .requestMatchers("/api/administrador/login").permitAll() // Temporariamente permitir tudo
+        .anyRequest().permitAll()
+            .and()
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     http.headers().frameOptions().disable(); 

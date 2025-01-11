@@ -1,8 +1,12 @@
 package br.com.desafioresidencia.gerenciadoreventos.security.utils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import javax.crypto.SecretKey;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import br.com.desafioresidencia.gerenciadoreventos.security.JwtConfig;
@@ -10,25 +14,34 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @Component
 public class JwtUtil {
 
    @Autowired
    private JwtConfig jwtConfig;
+   
+   @Value("${jwt.secret}")
+   private String secretKey;
 
     private static final long EXPIRATION_TIME = 864_000_000; // 10 dias
 
-    // Gera o token JWT com o e-mail do usuário
-    public String gerarToken(String subject) {
-        return Jwts.builder()
-                .setSubject(subject)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecretKey())
-                .compact();
-    }
+    
+    public String gerarToken(String email) {
+    	
+    	 if (jwtConfig.getSecretKey() == null || jwtConfig.getSecretKey().isEmpty()) {
+    	        throw new IllegalArgumentException("A chave secreta do JWT não pode ser vazia");
+    	    }
+    	 	byte[] keyBytes = jwtConfig.getSecretKey().getBytes(StandardCharsets.UTF_8);
+    	 	SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
+    	 	
+    	    return Jwts.builder().setSubject(email).setIssuedAt(new Date())
+    	            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+    	            .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecretKey()).compact();
+    	}
 
     // Extrai as claims (informações) do token JWT
     public Claims extrairClaims(String token) {
@@ -52,7 +65,12 @@ public class JwtUtil {
 
     // Verifica se o token ainda é válido (não expirou)
     public boolean verificarToken(String token) {
-        return !extrairClaims(token).getExpiration().before(new Date());
+        try {
+            Claims claims = extrairClaims(token);
+            return !claims.getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return false; // Retorna falso se o token estiver expirado
+        }
     }
 
     // Autentica o token verificando o e-mail e a validade
