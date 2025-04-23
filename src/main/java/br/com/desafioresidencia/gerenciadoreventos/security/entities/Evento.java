@@ -31,13 +31,13 @@ public class Evento {
 
     @ManyToOne
     @JoinColumn(name = "administrador_id", nullable = false)
-    private Administrador administrador;
+    private Usuario administrador;
 
     // Construtor Padrão
     public Evento() {}
 
     // Construtor completo
-    public Evento(String nome, LocalDate data, String localizacao, String imagem, Administrador administrador) {
+    public Evento(String nome, LocalDate data, String localizacao, String imagem, Usuario administrador) {
         this.nome = nome;
         this.data = data;
         this.localizacao = localizacao;
@@ -86,11 +86,11 @@ public class Evento {
         this.imagem = imagem;
     }
 
-    public Administrador getAdministrador() {
+    public Usuario getAdministrador() {
         return administrador;
     }
 
-    public void setAdministrador(Administrador administrador) {
+    public void setAdministrador(Usuario administrador) {
         this.administrador = administrador;
     }
 

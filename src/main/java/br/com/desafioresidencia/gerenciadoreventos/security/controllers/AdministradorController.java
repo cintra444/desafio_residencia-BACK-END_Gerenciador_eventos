@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.desafioresidencia.gerenciadoreventos.security.dtos.AdministradorDTO;
-import br.com.desafioresidencia.gerenciadoreventos.security.entities.Administrador;
+import br.com.desafioresidencia.gerenciadoreventos.security.entities.Usuario;
 import br.com.desafioresidencia.gerenciadoreventos.security.services.AdministradorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,14 +31,14 @@ public class AdministradorController {
 			@ApiResponse(responseCode = "201", description = "Administrador cadastrado com sucesso.", content = @Content(schema = @Schema(implementation = AdministradorDTO.class))),
 			@ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos.")})
 	public AdministradorDTO cadastrarAdministrador(
-			@Valid @RequestBody Administrador admin) {
+			@Valid @RequestBody Usuario admin) {
 
 		if (admin.getSenha() == null || admin.getSenha().isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					"A senha não pode ser nula ou vazia");
 		}
 
-		Administrador administradorSalvo = administradorService
+		Usuario administradorSalvo = administradorService
 				.cadastrarAdministrador(admin);
 		return new AdministradorDTO(administradorSalvo);
 	}

@@ -15,31 +15,25 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(apiInfo()) 
-                .components(new Components()
-                        .addSecuritySchemes("BearerAuth", securityScheme())) // Adiciona o esquema de segurança JWT
-                .addSecurityItem(new SecurityRequirement().addList("BearerAuth")); // Aplica segurança a todos os endpoints
+                .info(apiInfo())
+                .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement().addList("BearerAuth"))
+                .components(new io.swagger.v3.oas.models.Components()
+                        .addSecuritySchemes("BearerAuth", new io.swagger.v3.oas.models.security.SecurityScheme()
+                                .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")));
     }
 
     // Informações sobre a API
     private Info apiInfo() {
         return new Info()
                 .title("Gerenciador de Eventos API")
-                .description("API para gerenciar eventos no desafio da residência.")
+                .description("API para gerenciar eventos no desafio de residência")
                 .version("1.0.0")
                 .contact(new Contact()
                         .name("Eber Cintra")
-                        .url("URL do Portfólio ou LinkedIn")
-                        .email("desafioneki@gmail.com"));
+                        .url("https://www.linkedin.com/in/ebercintra/")
+                        .email("cintra.eber@gmail.com"));
     }
 
-    // Configuração de segurança JWT
-    private SecurityScheme securityScheme() {
-        return new SecurityScheme()
-                .name("Authorization")
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT") // 
-                .description("Insira o token JWT no formato: Bearer {seu token}");
-    }
 }

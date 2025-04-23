@@ -1,6 +1,6 @@
 package br.com.desafioresidencia.gerenciadoreventos.security.dtos;
 
-import br.com.desafioresidencia.gerenciadoreventos.security.entities.Administrador;
+import br.com.desafioresidencia.gerenciadoreventos.security.entities.Usuario;
 
 public class AdministradorDTO {
 
@@ -8,7 +8,7 @@ public class AdministradorDTO {
     private String nome;
     private String email;
 
-    public AdministradorDTO(Administrador administrador) {
+    public AdministradorDTO(Usuario administrador) {
         this.id = administrador.getId();
         this.nome = administrador.getNome();
         this.email = administrador.getEmail();
